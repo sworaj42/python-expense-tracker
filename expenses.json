@@ -1,12 +1,26 @@
 [
   {
-    "date": "2002-09-24",
-    "description": "payment for birth",
-    "amount": 5000.0
+    "date": "2025-12-08",
+    "description": "Grand sports membership",
+    "category": "Fitness",
+    "amount": 10000.0
   },
   {
-    "date": "2002-09-25",
-    "description": "payment for medicine",
+    "date": "2025-09-08",
+    "description": "Lunch",
+    "category": "Food",
+    "amount": 90.0
+  },
+  {
+    "date": "2025-12-10",
+    "description": "Medicine",
+    "category": "Medical",
     "amount": 100.0
+  },
+  {
+    "date": "2025-12-08",
+    "description": "Dinner",
+    "category": "Food",
+    "amount": 500.0
   }
 ]
