@@ -1,6 +1,9 @@
 import json
 import os
 from datetime import datetime
+import matplotlib.pyplot as plt
+import csv
+
 
 def load_expenses():
     if not os.path.exists(FILE_NAME):
@@ -94,13 +97,58 @@ def view_monthly_summary():
                 by_category[cat] = 0
             by_category[cat] += amount
 
+    # If no matching expenses, stop here
     if not found:
         print("No expenses found for this month.")
-    else:
-        print(f"\nTotal spending in {month}: {total}")
-        print("By category:")
-        for cat, cat_total in by_category.items():
-            print(f"- {cat}: {cat_total}")
+        return
+
+    # Text summary
+    print(f"\nTotal spending in {month}: {total}")
+    print("By category:")
+    for cat, cat_total in by_category.items():
+        print(f"- {cat}: {cat_total}")
+
+    # Prepare data for bar chart
+    categories = list(by_category.keys())
+    amounts = list(by_category.values())
+
+    # Show bar chart
+    plt.figure(figsize=(8, 4))
+    plt.bar(categories, amounts, color='skyblue')
+    plt.title(f"Spending by Category for {month}")
+    plt.xlabel("Category")
+    plt.ylabel("Amount Spent")
+    plt.tight_layout()
+    plt.show()
+
+    daily_totals = {}
+
+    for exp in expenses:
+        if exp["date"].startswith(month):
+            day = int(exp["date"].split("-")[2])  # extract DD from YYYY-MM-DD
+            daily_totals[day] = daily_totals.get(day, 0) + exp["amount"]
+
+    # If somehow no daily totals exist, skip
+    if not daily_totals:
+        print("No daily data to plot.")
+        return
+
+    # Sort days
+    days = sorted(daily_totals.keys())
+    amounts_by_day = [daily_totals[day] for day in days]
+
+    # Plot bar chart
+    plt.figure(figsize=(9, 4))
+    plt.bar(days, amounts_by_day, color='orange')
+    plt.title(f"Daily Spending Trend for {month}")
+    plt.xlabel("Day of Month")
+    plt.ylabel("Amount Spent")
+    plt.xticks(days)  # Show only the real days
+    plt.grid(axis='y', linestyle='--', alpha=0.4)
+    plt.tight_layout()
+    plt.show()
+
+
 
 def view_all_expenses():
     print("\n--- All Expenses ---")
@@ -108,18 +156,35 @@ def view_all_expenses():
     if not expenses:
         print("No expenses recorded yet.")
         return
-    
-    total= 0
+
+    total = 0
+    by_category = {}
 
     print(f"\n{'ID':<3}| {'Date':<12}| {'Category':<12}| {'Description':<25}| {'Amount'}")
     print("-" * 70)
-    
+
     for idx, exp in enumerate(expenses, start=1):
         print(f"{idx:<3}| {exp['date']:<12}| {exp['category']:<12}| {exp['description']:<25}| {exp['amount']}")
         total += exp["amount"]
 
+        # Build category totals
+        cat = exp.get("category", "Other")
+        by_category[cat] = by_category.get(cat, 0) + exp["amount"]
+
     print("-" * 70)
     print(f"Total of all expenses: {total}")
+
+    # ---------- BAR CHART FOR ALL EXPENSES ----------
+    categories = list(by_category.keys())
+    amounts = list(by_category.values())
+
+    plt.figure(figsize=(8, 4))
+    plt.bar(categories, amounts, color='lightgreen')
+    plt.title("Total Spending by Category (All Time)")
+    plt.xlabel("Category")
+    plt.ylabel("Amount Spent")
+    plt.tight_layout()
+    plt.show()
 
 def delete_expense():
     print("\n--- Delete Expense ---")
@@ -211,7 +276,7 @@ def update_expense():
     while True:
         new_date = input(f"New date [{exp['date']}] (YYYY-MM-DD): ").strip()
         if new_date == "":
-            break  # keep old
+            break  
         try:
             datetime.strptime(new_date, "%Y-%m-%d")
             exp["date"] = new_date
@@ -245,6 +310,34 @@ def update_expense():
     save_expenses()
     print("Expense updated successfully!")
 
+def export_to_csv():
+    print("\n--- Export to CSV ---")
+
+    if not expenses:
+        print("No expenses to export.")
+        return
+
+    filename = "expenses_export.csv"
+
+    with open(filename, "w", newline="", encoding="utf-8") as file:
+        writer = csv.writer(file)
+
+        # Header row
+        writer.writerow(["date", "description", "category", "amount"])
+
+        # Data rows
+        for exp in expenses:
+            writer.writerow([
+                exp["date"],
+                exp["description"],
+                exp["category"],
+                exp["amount"]
+            ])
+
+    print(f"Expenses successfully exported to {filename}")
+
+
+
 
 def main():
     while True:
@@ -255,7 +348,8 @@ def main():
         print("4. View all expenses.")
         print("5. Delete expense.")
         print("6. Update expense.")
-        print("7. Exit")
+        print("7.Export to CSV.")
+        print("8. Exit")
 
         choice=input("Enter your choice: ")
 
@@ -279,11 +373,14 @@ def main():
 
         elif choice=="6":
             update_expense()
-
+        
         elif choice=="7":
+            export_to_csv()
+
+        elif choice=="8":
             print("You exited the main menu.")
             break
-        else:
+        else: 
             print("Invalid option, try again.")
 if __name__ == "__main__":
     main()

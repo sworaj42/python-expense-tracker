@@ -22,5 +22,17 @@
     "description": "Dinner",
     "category": "Food",
     "amount": 500.0
+  },
+  {
+    "date": "2025-12-10",
+    "description": "Breakfast",
+    "category": "Food",
+    "amount": 140.0
+  },
+  {
+    "date": "2025-12-10",
+    "description": "Chicken Drumsticks",
+    "category": "Food",
+    "amount": 715.0
   }
 ]
