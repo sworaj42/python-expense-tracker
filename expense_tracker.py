@@ -67,7 +67,6 @@ def load_expenses():
 
 
 expenses = load_expenses()
-print("Loaded from:", os.path.abspath(FILE_NAME), "| Count:", len(expenses))
 
 
 
